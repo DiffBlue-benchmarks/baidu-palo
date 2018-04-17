@@ -17,7 +17,7 @@
 # under the License.
 -->
 
-<project name="palo-fe" default="jar" basedir=".">
+<project name="palo-fe" default="jar" basedir="." xmlns:jacoco="antlib:org.jacoco.ant">
     <property environment="env" />
     <!-- set global properties for this build -->
     <property name="libdir"  value="${basedir}/../thirdparty/installed/lib/jar"/>
@@ -26,6 +26,10 @@
     <property name="builddir" value="${basedir}/build/"/>
     <property name="genjavadir" value="${basedir}/../gensrc/build/java"/>
     <property name="outputdir" value="${basedir}/output/"/>
+
+    <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+        <classpath path="${basedir}/jacocoant.jar" />
+    </taskdef>
 
     <echo message="${builddir}"/>
     <target name="clean">
@@ -129,11 +133,67 @@
     </target>
 
    <!-- compile all the test java source files -->
-   <target name="compile-test" depends="prepare, compile-src">
+   <target name="compile-test" depends="prepare, compile-src, instrument-src">
        <javac destdir="${builddir}/compile/test" source="1.8" includeantruntime="false" debug="true" failonerror="true" debuglevel="lines,vars,source">
             <classpath refid="classpathid"/>
             <src path="test"/>
        </javac>
    </target>
 
+   <target name="instrument-src" depends="compile-src">
+       <jacoco:instrument destdir="${builddir}/compile/instrumented_classes">
+            <fileset dir="${builddir}/compile/src" />
+       </jacoco:instrument>
+   </target>
+
+   <target name="test" depends="compile-test">
+      <mkdir dir="${builddir}/compile/test-results" />
+      <jacoco:coverage destfile="${builddir}/jacoco.exec">
+          <junit printsummary="yes" fork="true">
+              <classpath>
+                  <pathelement location="${builddir}/compile/instrumented_classes"/>
+                  <pathelement location="${builddir}/compile/test"/>
+                  <pathelement location="${basedir}/jacocoagent.jar"/>
+                  <fileset dir="${libdir}">
+                      <include name="*.jar" />
+                  </fileset>
+                  <fileset dir="${kudulibdir}">
+                      <include name="*.jar" />
+                  </fileset>
+                  <fileset dir="${k8slibdir}">
+                      <include name="*.jar" />
+                  </fileset>
+              </classpath>
+              <sysproperty key="jacoco-agent.destfile" file="${builddir}/jacoco.exec"/>
+              <batchtest todir="${builddir}/compile/test-results">
+                  <formatter type="xml" />
+                  <fileset dir="${basedir}/test">
+                      <include name="**/*Test.java" />
+                  </fileset>
+              </batchtest>
+          </junit>
+      </jacoco:coverage>
+      <jacoco:report>
+          <executiondata>
+              <file file="${builddir}/jacoco.exec" />
+          </executiondata>
+          <structure name="Palo Frontend">
+              <classfiles>
+                  <fileset dir="${builddir}/compile/src" />
+              </classfiles>
+              <sourcefiles encoding="UTF-8">
+                  <fileset dir="${basedir}/src" />
+              </sourcefiles>
+          </structure>
+          <html destdir="${builddir}/jacoco" />
+          <xml destfile="${builddir}/jacoco/jacoco.xml" />
+      </jacoco:report>
+      <mkdir dir="${builddir}/junit-report" />
+      <junitreport todir="${builddir}/junit-report">
+          <fileset dir="${builddir}/compile/test-results">
+              <include name="TEST-*.xml" />
+          </fileset>
+          <report todir="${builddir}/junit-report" />
+      </junitreport>
+   </target>
 </project>

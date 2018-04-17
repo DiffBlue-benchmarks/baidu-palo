@@ -444,10 +444,10 @@ build_bzip
 build_lzo2
 build_boost # must before thrift
 build_ncurses
-build_llvm
+#build_llvm
 build_protobuf
 build_gflags
-build_glog
+#build_glog
 build_gtest
 build_rapidjson
 build_snappy

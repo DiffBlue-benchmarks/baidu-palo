@@ -1,0 +1,11 @@
+be/build
+docs/build
+fe/build
+fe/output
+gensrc/build
+gensrc/script/*.pyc
+output
+palo-meta
+thirdparty/installed
+thirdparty/src
+**/*.properties
