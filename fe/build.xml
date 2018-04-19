@@ -55,12 +55,16 @@
         <pathelement location="${builddir}/compile/src"/>
         <fileset dir="${libdir}">
             <include name="*.jar" />
+            <exclude name="powermock-easymock-1.6.1-full.jar" />
         </fileset>
         <fileset dir="${kudulibdir}">
              <include name="*.jar" />
         </fileset>
         <fileset dir="${k8slibdir}">
              <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libdir}/diffblue">
+            <include name="*.jar" />
         </fileset>
     </path>
 

@@ -115,6 +115,14 @@ rm -rf $TP_JAR_DIR/*
 mkdir -p $TP_JAR_DIR/
 
 tar xzf $TP_DIR/java-libraries.tar.gz -C $TP_JAR_DIR/
+
+if [ ! -f $TP_DIR/diffblue-java-libraries.tar.gz ];then
+    echo "diffblue-java-libraries.tar.gz is mising"
+    exit 1
+fi
+
+tar xzf $TP_DIR/diffblue-java-libraries.tar.gz -C $TP_JAR_DIR/
+
 echo "Finish to unpack java libraries"
 
 #########################
